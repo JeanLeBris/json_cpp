@@ -45,10 +45,6 @@ namespace json{
         init(ctype, ktype, {.value = 0});
     }
 
-    Json::Json(types ctype, types ktype, json::content key){
-        init(ctype, ktype, key);
-    }
-
     Json::Json(Json* value){
         this->length = value->length;
         this->content_type = value->content_type;
@@ -79,11 +75,6 @@ namespace json{
             free(this->content.string);
             this->content.string = nullptr;
         }
-    }
-
-    void Json::set_value(){
-        this->content_type = none;
-        this->content.children = nullptr;
     }
 
     void Json::set_value(int value){

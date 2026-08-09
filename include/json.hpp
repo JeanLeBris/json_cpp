@@ -39,8 +39,8 @@ namespace json{
     };
 
     class Json{
-        public:
-        // private:
+        // public:
+        private:
 
         // The type of keys in the children objects
         // The type of the key is always none if the type of content is not 'object'
@@ -49,22 +49,21 @@ namespace json{
         // The type of content in this object
         types content_type;
 
-        // public:
-
         int length;
         content key;
         content content;
 
         void init(types ctype, types ktype, json::content key);
+        char* to_string(char* output, int* size, bool formatting, const char* indentation, int level);
+
+        public:
 
         Json();
         Json(types ctype);
         Json(types ctype, types ktype);
-        Json(types ctype, types ktype, json::content key);
         Json(Json* value);
         ~Json();
 
-        void set_value();
         void set_value(int value);
         void set_value(const char* value);
 
@@ -75,7 +74,6 @@ namespace json{
         Json* get_child(int key);
         Json* get_child(const char* key);
 
-        char* to_string(char* output, int* size, bool formatting, const char* indentation, int level);
         char* to_string();
         char* to_formatted_string(const char* indentation = "\t");
     };
