@@ -5,6 +5,15 @@
 #include "../include/json.hpp"
 
 namespace json{
+    char* append_string(char* destination, const char* new_string, int* size){
+        if(strlen(destination) + strlen(new_string) > *size - 1){
+            *size += strlen(new_string);
+            destination = (char*) realloc(destination, *size * sizeof(char));
+        }
+        strcat(destination, new_string);
+        return destination;
+    }
+
     void Json::init(types ctype, types ktype, json::content key){
         this->level = 0;
         this->length = 0;
@@ -180,216 +189,108 @@ namespace json{
         char buffer_string[20] = "";
 
         if(output == nullptr){
-            output = (char*) malloc(100 * sizeof(char));
+            output = (char*) malloc(1 * sizeof(char));
             output[0] = '\0';
-            *size = 100;
+            *size = 1;
         }
 
         if(this->content_type == number){
-            sprintf(buffer_string, "%d", this->content.value);
-            if(strlen(output) + strlen(buffer_string) > *size - 1){
-                output = (char*) realloc(output, (((strlen(buffer_string) / 100) + 1) * 100) * sizeof(char));
-                *size += 100;
-            }
-            strcat(output, buffer_string);
+            output = append_string(output, buffer_string, size);
         }
         else if(this->content_type == string){
-            if(strlen(output) + 1 > *size - 1){
-                output = (char*) realloc(output, 100 * sizeof(char));
-                *size += 100;
-            }
-            strcat(output, "\"");
-
-            if(strlen(output) + strlen(this->content.string) > *size - 1){
-                output = (char*) realloc(output, (((strlen(this->content.string) / 100) + 1) * 100) * sizeof(char));
-                *size += 100;
-            }
-            strcat(output, this->content.string);
-
-            if(strlen(output) + 1 > *size - 1){
-                output = (char*) realloc(output, 100 * sizeof(char));
-                *size += 100;
-            }
-            strcat(output, "\"");
+            output = append_string(output, "\"", size);
+            output = append_string(output, this->content.string, size);
+            output = append_string(output, "\"", size);
         }
         else if(this->content_type == object){
             if(this->key_type == incremental){
-                if(strlen(output) + 1 > *size - 1){
-                    output = (char*) realloc(output, 100 * sizeof(char));
-                    *size += 100;
-                }
-                strcat(output, "[");
+                output = append_string(output, "[", size);
 
                 for(int i = 0; i < this->length; i++){
                     if(formatting){
-                        strcat(output, "\n");
-                        if(strlen(output) + (strlen(indentation) * (level + 1)) + 1 > *size - 1){
-                            output = (char*) realloc(output, 100 * sizeof(char));
-                            *size += 100;
-                        }
+                        output = append_string(output, "\n", size);
                         for(int i = 0; i < level + 1; i++){
-                            strcat(output, indentation);
+                            output = append_string(output, indentation, size);
                         }
                     }
 
                     output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
 
                     if(i < this->length - 1){
-                        if(strlen(output) + 1 > *size - 1){
-                            output = (char*) realloc(output, 100 * sizeof(char));
-                            *size += 100;
-                        }
-                        strcat(output, ",");
+                        output = append_string(output, ",", size);
                     }
                 }
 
                 if(formatting){
-                    strcat(output, "\n");
-                    if(strlen(output) + (strlen(indentation) * level) + 1 > *size - 1){
-                        output = (char*) realloc(output, 100 * sizeof(char));
-                        *size += 100;
-                    }
+                    output = append_string(output, "\n", size);
                     for(int i = 0; i < level; i++){
-                        strcat(output, indentation);
+                        output = append_string(output, indentation, size);
                     }
                 }
 
-                if(strlen(output) + 1 > *size - 1){
-                    output = (char*) realloc(output, 100 * sizeof(char));
-                    *size += 100;
-                }
-                strcat(output, "]");
+                output = append_string(output, "]", size);
             }
             else if(this->key_type == number){
-                if(strlen(output) + 1 > *size - 1){
-                    output = (char*) realloc(output, 100 * sizeof(char));
-                    *size += 100;
-                }
-                strcat(output, "{");
+                output = append_string(output, "{", size);
 
                 for(int i = 0; i < this->length; i++){
                     if(formatting){
-                        strcat(output, "\n");
-                        if(strlen(output) + (strlen(indentation) * (level + 1)) + 1 > *size - 1){
-                            output = (char*) realloc(output, 100 * sizeof(char));
-                            *size += 100;
-                        }
+                        output = append_string(output, "\n", size);
                         for(int i = 0; i < level + 1; i++){
-                            strcat(output, indentation);
+                            output = append_string(output, indentation, size);
                         }
                     }
                     
                     sprintf(buffer_string, "%d", this->content.children[i]->key.value);
-                    if(strlen(output) + strlen(buffer_string) > *size - 1){
-                        output = (char*) realloc(output, (((strlen(buffer_string) / 100) + 1) * 100) * sizeof(char));
-                        *size += 100;
-                    }
-                    strcat(output, buffer_string);
-
-                    if(strlen(output) + 1 > *size - 1){
-                        output = (char*) realloc(output, 100 * sizeof(char));
-                        *size += 100;
-                    }
-                    strcat(output, ":");
+                    output = append_string(output, buffer_string, size);
+                    output = append_string(output, ":", size);
                     
                     output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
 
                     if(i < this->length - 1){
-                        if(strlen(output) + 1 > *size - 1){
-                            output = (char*) realloc(output, 100 * sizeof(char));
-                            *size += 100;
-                        }
-                        strcat(output, ",");
+                        output = append_string(output, ",", size);
                     }
                 }
 
                 if(formatting){
-                    strcat(output, "\n");
-                    if(strlen(output) + (strlen(indentation) * level) + 1 > *size - 1){
-                        output = (char*) realloc(output, 100 * sizeof(char));
-                        *size += 100;
-                    }
+                    output = append_string(output, "\n", size);
                     for(int i = 0; i < level; i++){
-                        strcat(output, indentation);
+                        output = append_string(output, indentation, size);
                     }
                 }
 
-                if(strlen(output) + 1 > *size - 1){
-                    output = (char*) realloc(output, 100 * sizeof(char));
-                    *size += 100;
-                }
-                strcat(output, "}");
+                output = append_string(output, "}", size);
             }
             else if(this->key_type == string){
-                if(strlen(output) + 1 > *size - 1){
-                    output = (char*) realloc(output, 100 * sizeof(char));
-                    *size += 100;
-                }
-                strcat(output, "{");
+                output = append_string(output, "{", size);
 
                 for(int i = 0; i < this->length; i++){
                     if(formatting){
-                        strcat(output, "\n");
-                        if(strlen(output) + (strlen(indentation) * (level + 1)) + 1 > *size - 1){
-                            output = (char*) realloc(output, 100 * sizeof(char));
-                            *size += 100;
-                        }
+                        output = append_string(output, "\n", size);
                         for(int i = 0; i < level + 1; i++){
-                            strcat(output, indentation);
+                            output = append_string(output, indentation, size);
                         }
                     }
 
-                    if(strlen(output) + 1 > *size - 1){
-                        output = (char*) realloc(output, 100 * sizeof(char));
-                        *size += 100;
-                    }
-                    strcat(output, "\"");
-
-                    if(strlen(output) + strlen(this->content.children[i]->key.string) > *size - 1){
-                        output = (char*) realloc(output, (((strlen(this->content.children[i]->key.string) / 100) + 1) * 100) * sizeof(char));
-                        *size += 100;
-                    }
-                    strcat(output, this->content.children[i]->key.string);
-
-                    if(strlen(output) + 1 > *size - 1){
-                        output = (char*) realloc(output, 100 * sizeof(char));
-                        *size += 100;
-                    }
-                    strcat(output, "\"");
-                    
-                    if(strlen(output) + 1 > *size - 1){
-                        output = (char*) realloc(output, 100 * sizeof(char));
-                        *size += 100;
-                    }
-                    strcat(output, ":");
+                    output = append_string(output, "\"", size);
+                    output = append_string(output, this->content.children[i]->key.string, size);
+                    output = append_string(output, "\":", size);
                     
                     output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
 
                     if(i < this->length - 1){
-                        if(strlen(output) + 1 > *size - 1){
-                            output = (char*) realloc(output, 100 * sizeof(char));
-                            *size += 100;
-                        }
-                        strcat(output, ",");
+                        output = append_string(output, ",", size);
                     }
                 }
 
                 if(formatting){
-                    strcat(output, "\n");
-                    if(strlen(output) + (strlen(indentation) * level) + 1 > *size - 1){
-                        output = (char*) realloc(output, 100 * sizeof(char));
-                        *size += 100;
-                    }
+                    output = append_string(output, "\n", size);
                     for(int i = 0; i < level; i++){
-                        strcat(output, indentation);
+                        output = append_string(output, indentation, size);
                     }
                 }
 
-                if(strlen(output) + 1 > *size - 1){
-                    output = (char*) realloc(output, 100 * sizeof(char));
-                    *size += 100;
-                }
-                strcat(output, "}");
+                output = append_string(output, "}", size);
             }
         }
 

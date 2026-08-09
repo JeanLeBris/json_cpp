@@ -16,6 +16,8 @@ namespace json{
     //     object
     // };
 
+    char* append_string(char* destination, const char* new_string, int* size);
+
     enum types{
         none,
         number,
