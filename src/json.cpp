@@ -15,7 +15,6 @@ namespace json{
     }
 
     void Json::init(types ctype, types ktype, json::content key){
-        this->level = 0;
         this->length = 0;
         this->content_type = ctype;
         this->key_type = ktype;
@@ -51,7 +50,6 @@ namespace json{
     }
 
     Json::Json(Json* value){
-        this->level = value->level;
         this->length = value->length;
         this->content_type = value->content_type;
         this->key_type = value->key_type;
@@ -244,7 +242,7 @@ namespace json{
                     sprintf(buffer_string, "%d", this->content.children[i]->key.value);
                     output = append_string(output, buffer_string, size);
                     output = append_string(output, ":", size);
-                    
+
                     output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
 
                     if(i < this->length - 1){

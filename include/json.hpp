@@ -51,7 +51,6 @@ namespace json{
 
         // public:
 
-        int level;
         int length;
         content key;
         content content;
