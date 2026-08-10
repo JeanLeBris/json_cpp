@@ -25,7 +25,8 @@ namespace json{
 
         incremental,
 
-        object
+        object,
+        json
     };
 
     union content;

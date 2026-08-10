@@ -192,6 +192,9 @@ namespace json{
             output = append_string(output, this->content.string, size);
             output = append_string(output, "\"", size);
         }
+        else if(this->content_type == json){
+            output = append_string(output, this->content.string, size);
+        }
         else if(this->content_type == object){
             if(this->key_type == incremental){
                 output = append_string(output, "[", size);
