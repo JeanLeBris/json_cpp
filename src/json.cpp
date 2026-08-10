@@ -23,6 +23,7 @@ namespace json{
         case none:
         case object:
         case string:
+        case json:
             this->content.children = nullptr;
             break;
         case number:
