@@ -79,19 +79,21 @@ namespace json{
     }
 
     void Json::set_value(int value){
-        this->content_type = number;
-        this->content.value = value;
+        if(this->content_type == number){
+            this->content.value = value;
+        }
     }
 
     void Json::set_value(const char* value){
-        this->content_type = string;
-        if(this->content.string == nullptr){
-            this->content.string = (char*) malloc((strlen(value) + 1) * sizeof(char));
+        if(this->content_type == string || this->content_type == json){
+            if(this->content.string == nullptr){
+                this->content.string = (char*) malloc((strlen(value) + 1) * sizeof(char));
+            }
+            else{
+                this->content.string = (char*) realloc(this->content.string, (strlen(value) + 1) * sizeof(char));
+            }
+            strcpy(this->content.string, value);
         }
-        else{
-            this->content.string = (char*) realloc(this->content.string, (strlen(value) + 1) * sizeof(char));
-        }
-        strcpy(this->content.string, value);
     }
 
     void Json::set_child(Json data){
