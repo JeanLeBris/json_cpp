@@ -93,6 +93,14 @@ namespace json{
                 this->content.string = (char*) realloc(this->content.string, (strlen(value) + 1) * sizeof(char));
             }
             strcpy(this->content.string, value);
+            if(strlen(this->content.string) > 1 && this->content.string[strlen(this->content.string) - 1] == '\\' && this->content.string[strlen(this->content.string) - 2] != '\\'){
+                this->content.string = (char*) realloc(this->content.string, (strlen(this->content.string) + 1) * sizeof(char));
+                strcat(this->content.string, "\\");
+            }
+            else if(strlen(this->content.string) == 1 && this->content.string[strlen(this->content.string) - 1] == '\\'){
+                this->content.string = (char*) realloc(this->content.string, (strlen(this->content.string) + 1) * sizeof(char));
+                strcat(this->content.string, "\\");
+            }
         }
     }
 
