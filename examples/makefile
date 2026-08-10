@@ -7,8 +7,8 @@ examples: obj bin $(OBJNAMES)
 	$(COPYFILE) ..$(FILE_SLASH)$(BINDIR)$(FILE_SLASH)* .$(FILE_SLASH)$(BINDIR)
 
 %.o:
-	$(CC) -c $(SRCDIR)/$(@:.o=.cpp) -g -o $(OBJDIR)/$@
-	$(CC) $(OBJDIR)/$@ -g -L ../$(BINDIR) -l $(EXEC) -l $(DEPENDENCIES) -o $(BINDIR)/$(@:.o=.exe)
+	$(CC) -c $(SRCDIR)/$(@:.o=.cpp) -o $(OBJDIR)/$@
+	$(CC) $(OBJDIR)/$@ -L ../$(BINDIR) -l $(EXEC) -l $(DEPENDENCIES) -o $(BINDIR)/$(@:.o=.exe)
 # The "-l $(DEPENDENCIES)" should not be necessary in the case of a compilation with shared libraries, but it is necessary in the case of a compilation with static libraries
 
 .PHONY: examples

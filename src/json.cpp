@@ -184,6 +184,7 @@ namespace json{
         }
 
         if(this->content_type == number){
+            sprintf(buffer_string, "%d", this->content.value);
             output = append_string(output, buffer_string, size);
         }
         else if(this->content_type == string){

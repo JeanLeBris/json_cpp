@@ -2,8 +2,8 @@
 # .SILENT: compile examples clean
 
 export CC=g++
-export CFLAGS= -g
-export LDFLAGS= -g
+export CFLAGS=
+export LDFLAGS=
 export EXEC=json
 SRCNAMES= json.cpp
 export SRCDIR=src
