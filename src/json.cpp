@@ -376,7 +376,6 @@ namespace json{
         if(this->content_type == number){
             sprintf(buffer_string, "%d", this->content.value);
             output->append(buffer_string);
-            output->append(buffer_string);
         }
         else if(this->content_type == string){
             output->append("\"");
@@ -489,5 +488,131 @@ namespace json{
     std::string* Json::to_formatted_string(const char* indentation){
         int size = 0;
         return this->to_string(new std::string(), &size, true, indentation, 0);
+    }
+
+    std::string Json::to_string(std::string output, int* size, bool formatting, const char* indentation, int level){
+        char buffer_string[20] = "";
+
+        // if(output == nullptr){
+        //     output = (char*) malloc(1 * sizeof(char));
+        //     output[0] = '\0';
+        //     *size = 1;
+        // }
+
+        if(this->content_type == number){
+            sprintf(buffer_string, "%d", this->content.value);
+            output.append(buffer_string);
+        }
+        else if(this->content_type == string){
+            output.append("\"");
+            output.append(this->content.string);
+            output.append("\"");
+        }
+        else if(this->content_type == json){
+            output.append(this->content.string);
+        }
+        else if(this->content_type == object){
+            if(this->key_type == incremental){
+                output.append("[");
+
+                for(int i = 0; i < this->length; i++){
+                    if(formatting){
+                        output.append("\n");
+                        for(int i = 0; i < level + 1; i++){
+                            output.append(indentation);
+                        }
+                    }
+
+                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+
+                    if(i < this->length - 1){
+                        output.append(",");
+                    }
+                }
+
+                if(formatting){
+                    output.append("\n");
+                    for(int i = 0; i < level; i++){
+                        output.append(indentation);
+                    }
+                }
+
+                output.append("]");
+            }
+            else if(this->key_type == number){
+                output.append("{");
+
+                for(int i = 0; i < this->length; i++){
+                    if(formatting){
+                        output.append("\n");
+                        for(int i = 0; i < level + 1; i++){
+                            output.append(indentation);
+                        }
+                    }
+                    
+                    sprintf(buffer_string, "%d", this->content.children[i]->key.value);
+                    output.append(buffer_string);
+                    output.append(":");
+
+                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+
+                    if(i < this->length - 1){
+                        output.append(",");
+                    }
+                }
+
+                if(formatting){
+                    output.append("\n");
+                    for(int i = 0; i < level; i++){
+                        output.append(indentation);
+                    }
+                }
+
+                output.append("}");
+            }
+            else if(this->key_type == string){
+                output.append("{");
+
+                for(int i = 0; i < this->length; i++){
+                    if(formatting){
+                        output.append("\n");
+                        for(int i = 0; i < level + 1; i++){
+                            output.append(indentation);
+                        }
+                    }
+
+                    output.append("\"");
+                    output.append(this->content.children[i]->key.string);
+                    output.append("\":");
+                    
+                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+
+                    if(i < this->length - 1){
+                        output.append(",");
+                    }
+                }
+
+                if(formatting){
+                    output.append("\n");
+                    for(int i = 0; i < level; i++){
+                        output.append(indentation);
+                    }
+                }
+
+                output.append("}");
+            }
+        }
+
+        return output;
+    }
+
+    std::string Json::to_string(std::string output){
+        int size = 0;
+        return this->to_string(output, &size, false, "", 0);
+    }
+
+    std::string Json::to_formatted_string(std::string output, const char* indentation){
+        int size = 0;
+        return this->to_string(output, &size, true, indentation, 0);
     }
 }

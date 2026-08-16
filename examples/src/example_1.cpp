@@ -46,5 +46,9 @@ int main(int argc, char** argv){
     printf("%s\n", test2->c_str());
     delete test2;
 
+    std::string test3;
+    test3 = obj1.to_formatted_string(test3);
+    printf("%s\n", test3.c_str());
+
     return 0;
 }

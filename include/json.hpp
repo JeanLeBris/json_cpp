@@ -57,8 +57,10 @@ namespace json{
         content content;
 
         void init(types ctype, types ktype, json::content key);
+        
         char* to_char_string(char* output, int* size, bool formatting, const char* indentation, int level);
         std::string* to_string(std::string* output, int* size, bool formatting, const char* indentation, int level);
+        std::string to_string(std::string output, int* size, bool formatting, const char* indentation, int level);
 
         public:
 
@@ -85,6 +87,8 @@ namespace json{
         char* to_formatted_char_string(const char* indentation = "\t");
         std::string* to_string();
         std::string* to_formatted_string(const char* indentation = "\t");
+        std::string to_string(std::string output);
+        std::string to_formatted_string(std::string output, const char* indentation = "\t");
     };
 }
 
