@@ -104,6 +104,26 @@ namespace json{
         }
     }
 
+    void Json::set_value(std::string value){
+        if(this->content_type == string || this->content_type == json){
+            if(this->content.string == nullptr){
+                this->content.string = (char*) malloc((value.length() + 1) * sizeof(char));
+            }
+            else{
+                this->content.string = (char*) realloc(this->content.string, (value.length() + 1) * sizeof(char));
+            }
+            strcpy(this->content.string, value.c_str());
+            if(strlen(this->content.string) > 1 && this->content.string[strlen(this->content.string) - 1] == '\\' && this->content.string[strlen(this->content.string) - 2] != '\\'){
+                this->content.string = (char*) realloc(this->content.string, (strlen(this->content.string) + 1) * sizeof(char));
+                strcat(this->content.string, "\\");
+            }
+            else if(strlen(this->content.string) == 1 && this->content.string[strlen(this->content.string) - 1] == '\\'){
+                this->content.string = (char*) realloc(this->content.string, (strlen(this->content.string) + 1) * sizeof(char));
+                strcat(this->content.string, "\\");
+            }
+        }
+    }
+
     void Json::set_child(Json data){
         Json* data_buffer = nullptr;
         if(this->key_type == incremental){
@@ -158,6 +178,28 @@ namespace json{
         }
     }
 
+    void Json::set_child(std::string key, Json data){
+        Json* data_buffer = nullptr;
+        if(this->key_type == string){
+            if(this->content.children == nullptr){
+                this->content.children = (Json**) malloc(sizeof(Json*));
+            }
+            else{
+                this->content.children = (Json**) realloc(this->content.children, (this->length + 1) * sizeof(Json*));
+            }
+            data_buffer = new Json(&data);
+            this->content.children[this->length] = data_buffer;
+            if(this->content.children[this->length]->key.string == nullptr){
+                this->content.children[this->length]->key.string = (char*) malloc((key.length() + 1) * sizeof(char));
+            }
+            else{
+                this->content.children[this->length]->key.string = (char*) realloc(this->content.children[this->length]->key.string, (key.length() + 1) * sizeof(char));
+            }
+            strcpy(this->content.children[this->length]->key.string, key.c_str());
+            this->length++;
+        }
+    }
+
     Json* Json::get_child(int key){
         if(this->key_type == incremental){
             if(key >= 0 && key < this->length){
@@ -185,7 +227,18 @@ namespace json{
         return nullptr;
     }
 
-    char* Json::to_string(char* output, int* size, bool formatting, const char* indentation, int level){
+    Json* Json::get_child(std::string key){
+        if(this->key_type == string){
+            for(int i = 0; i < this->length; i++){
+                if(strcmp(this->content.children[i]->key.string, key.c_str()) == 0){
+                    return this->content.children[i];
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    char* Json::to_char_string(char* output, int* size, bool formatting, const char* indentation, int level){
         char buffer_string[20] = "";
 
         if(output == nullptr){
@@ -218,7 +271,7 @@ namespace json{
                         }
                     }
 
-                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+                    output = this->content.children[i]->to_char_string(output, size, formatting, indentation, level+1);
 
                     if(i < this->length - 1){
                         output = append_string(output, ",", size);
@@ -249,7 +302,7 @@ namespace json{
                     output = append_string(output, buffer_string, size);
                     output = append_string(output, ":", size);
 
-                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+                    output = this->content.children[i]->to_char_string(output, size, formatting, indentation, level+1);
 
                     if(i < this->length - 1){
                         output = append_string(output, ",", size);
@@ -280,7 +333,7 @@ namespace json{
                     output = append_string(output, this->content.children[i]->key.string, size);
                     output = append_string(output, "\":", size);
                     
-                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+                    output = this->content.children[i]->to_char_string(output, size, formatting, indentation, level+1);
 
                     if(i < this->length - 1){
                         output = append_string(output, ",", size);
@@ -301,13 +354,140 @@ namespace json{
         return output;
     }
 
-    char* Json::to_string(){
+    char* Json::to_char_string(){
         int size = 0;
-        return this->to_string(nullptr, &size, false, "", 0);
+        return this->to_char_string(nullptr, &size, false, "", 0);
     }
 
-    char* Json::to_formatted_string(const char* indentation){
+    char* Json::to_formatted_char_string(const char* indentation){
         int size = 0;
-        return this->to_string(nullptr, &size, true, indentation, 0);
+        return this->to_char_string(nullptr, &size, true, indentation, 0);
+    }
+
+    std::string* Json::to_string(std::string* output, int* size, bool formatting, const char* indentation, int level){
+        char buffer_string[20] = "";
+
+        // if(output == nullptr){
+        //     output = (char*) malloc(1 * sizeof(char));
+        //     output[0] = '\0';
+        //     *size = 1;
+        // }
+
+        if(this->content_type == number){
+            sprintf(buffer_string, "%d", this->content.value);
+            output->append(buffer_string);
+            output->append(buffer_string);
+        }
+        else if(this->content_type == string){
+            output->append("\"");
+            output->append(this->content.string);
+            output->append("\"");
+        }
+        else if(this->content_type == json){
+            output->append(this->content.string);
+        }
+        else if(this->content_type == object){
+            if(this->key_type == incremental){
+                output->append("[");
+
+                for(int i = 0; i < this->length; i++){
+                    if(formatting){
+                        output->append("\n");
+                        for(int i = 0; i < level + 1; i++){
+                            output->append(indentation);
+                        }
+                    }
+
+                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+
+                    if(i < this->length - 1){
+                        output->append(",");
+                    }
+                }
+
+                if(formatting){
+                    output->append("\n");
+                    for(int i = 0; i < level; i++){
+                        output->append(indentation);
+                    }
+                }
+
+                output->append("]");
+            }
+            else if(this->key_type == number){
+                output->append("{");
+
+                for(int i = 0; i < this->length; i++){
+                    if(formatting){
+                        output->append("\n");
+                        for(int i = 0; i < level + 1; i++){
+                            output->append(indentation);
+                        }
+                    }
+                    
+                    sprintf(buffer_string, "%d", this->content.children[i]->key.value);
+                    output->append(buffer_string);
+                    output->append(":");
+
+                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+
+                    if(i < this->length - 1){
+                        output->append(",");
+                    }
+                }
+
+                if(formatting){
+                    output->append("\n");
+                    for(int i = 0; i < level; i++){
+                        output->append(indentation);
+                    }
+                }
+
+                output->append("}");
+            }
+            else if(this->key_type == string){
+                output->append("{");
+
+                for(int i = 0; i < this->length; i++){
+                    if(formatting){
+                        output->append("\n");
+                        for(int i = 0; i < level + 1; i++){
+                            output->append(indentation);
+                        }
+                    }
+
+                    output->append("\"");
+                    output->append(this->content.children[i]->key.string);
+                    output->append("\":");
+                    
+                    output = this->content.children[i]->to_string(output, size, formatting, indentation, level+1);
+
+                    if(i < this->length - 1){
+                        output->append(",");
+                    }
+                }
+
+                if(formatting){
+                    output->append("\n");
+                    for(int i = 0; i < level; i++){
+                        output->append(indentation);
+                    }
+                }
+
+                output->append("}");
+            }
+        }
+
+        return output;
+    }
+
+    std::string* Json::to_string(){
+        int size = 0;
+        return this->to_string(new std::string(), &size, false, "", 0);
+    }
+
+    std::string* Json::to_formatted_string(const char* indentation){
+        int size = 0;
+        return this->to_string(new std::string(), &size, true, indentation, 0);
     }
 }

@@ -1,6 +1,8 @@
 #ifndef JSON_HPP
 #define JSON_HPP
 
+#include <string>
+
 namespace json{
     // enum key_type{
     //     none,           // if there are no children (the object contains a number, a string or 'none')
@@ -55,7 +57,8 @@ namespace json{
         content content;
 
         void init(types ctype, types ktype, json::content key);
-        char* to_string(char* output, int* size, bool formatting, const char* indentation, int level);
+        char* to_char_string(char* output, int* size, bool formatting, const char* indentation, int level);
+        std::string* to_string(std::string* output, int* size, bool formatting, const char* indentation, int level);
 
         public:
 
@@ -67,16 +70,21 @@ namespace json{
 
         void set_value(int value);
         void set_value(const char* value);
+        void set_value(std::string value);
 
         void set_child(Json data);
         void set_child(int key, Json data);
         void set_child(const char* key, Json data);
+        void set_child(std::string key, Json data);
 
         Json* get_child(int key);
         Json* get_child(const char* key);
+        Json* get_child(std::string key);
 
-        char* to_string();
-        char* to_formatted_string(const char* indentation = "\t");
+        char* to_char_string();
+        char* to_formatted_char_string(const char* indentation = "\t");
+        std::string* to_string();
+        std::string* to_formatted_string(const char* indentation = "\t");
     };
 }
 
